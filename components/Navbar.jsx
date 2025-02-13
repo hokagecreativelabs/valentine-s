@@ -1,21 +1,35 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaBackward, FaPlay, FaPause } from "react-icons/fa"; // Icons for back, play, and pause
 
 export default function Navigation() {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false); // Music play state
-  const audioRef = React.useRef(new Audio('/my.mp3')); // Replace with your desired MP3 URL
+  const [audio, setAudio] = useState(null); // To store the audio instance
+
+  // Initialize the audio only on the client-side
+  useEffect(() => {
+    const audioInstance = new Audio('/my.mp3'); // Reference to your audio file
+    setAudio(audioInstance); // Set the audio instance in state
+
+    // Clean up on unmount
+    return () => {
+      audioInstance.pause();
+      audioInstance.currentTime = 0;
+    };
+  }, []); // Empty dependency array ensures this only runs once, after the component mounts
 
   // Function to toggle music play/pause
   const toggleMusic = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+    if (audio) {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      setIsPlaying(!isPlaying);
     }
-    setIsPlaying(!isPlaying);
   };
 
   return (
